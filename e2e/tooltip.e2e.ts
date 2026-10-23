@@ -106,4 +106,28 @@ test.describe("tooltip / disabled", () => {
     await I.hoverTrigger("tip-1")
     await I.seeContent("tip-1")
   })
+
+  test("should stay dismissed after escape when disabled is toggled while hovering", async ({ page }) => {
+    const toggleDisabled = async () => {
+      await page.getByTestId("disabled").focus()
+      await page.keyboard.press("Space")
+    }
+
+    await I.hoverTrigger("tip-1")
+    await I.seeContent("tip-1")
+
+    await I.pressKey("Escape")
+    await I.dontSeeContent("tip-1")
+
+    // disable and re-enable without the pointer leaving the trigger
+    await toggleDisabled()
+    await toggleDisabled()
+
+    // move within the trigger: escape dismissed the tooltip, so it should not reopen
+    const box = await page.getByTestId("tip-1-trigger").boundingBox()
+    await page.mouse.move(box!.x + box!.width / 2 + 3, box!.y + box!.height / 2)
+    await page.mouse.move(box!.x + box!.width / 2 - 3, box!.y + box!.height / 2)
+    await page.waitForTimeout(1200)
+    await I.dontSeeContent("tip-1")
+  })
 })

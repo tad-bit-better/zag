@@ -107,7 +107,9 @@ export function connect<P extends PropTypes>(
           send({ type: "pointer.move", value, triggerId })
         },
         onPointerLeave() {
-          if (disabled) return
+          // While disabled the tooltip is closed, and pointer.leave only clears the pointer-move
+          // flag, so the next hover after re-enabling opens it. Keep ignoring it if forced open.
+          if (disabled && open) return
           send({ type: "pointer.leave" })
         },
         onPointerCancel() {
